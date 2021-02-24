@@ -142,13 +142,11 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Server.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="win32_socket_multi_chatting.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="Server.cpp" />
     <ClCompile Include="win32_socket_multi_chatting.cpp" />
   </ItemGroup>
   <ItemGroup>

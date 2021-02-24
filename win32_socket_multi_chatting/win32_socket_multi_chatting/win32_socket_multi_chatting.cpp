@@ -1,6 +1,7 @@
 ﻿#include "framework.h"
 #include "win32_socket_multi_chatting.h"
 #include <string>
+#include "Client.h"
 
 using namespace std;
 
@@ -15,11 +16,13 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-//INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+Client* client;
 string informationMessage;
-HWND editBoxHandle;
+HWND editBoxOutputHandle;
+HWND editBoxInputHandle;
 
+void ConnectInformationMessage();
 void createChattingFrame();
 void uploadChatting();
 
@@ -102,6 +105,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         g_hWnd = hWnd;
         createChattingFrame();
+        client = new Client();
+        ConnectInformationMessage();
         break;
     case WM_COMMAND:
         {
@@ -145,44 +150,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-//INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-//{
-//    UNREFERENCED_PARAMETER(lParam);
-//    switch (message)
-//    {
-//    case WM_INITDIALOG:
-//        return (INT_PTR)TRUE;
-//
-//    case WM_COMMAND:
-//        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-//        {
-//            EndDialog(hDlg, LOWORD(wParam));
-//            return (INT_PTR)TRUE;
-//        }
-//        break;
-//    }
-//    return (INT_PTR)FALSE;
-//}
+void ConnectInformationMessage()
+{
+    if (client->IsConnect())
+    {
+        informationMessage += "System Message : server connect\r\n";
+        SetWindowText(editBoxOutputHandle, informationMessage.c_str());
+    }
+    else
+    {
+        informationMessage += "System Message : lost server connect\r\n";
+        SetWindowText(editBoxOutputHandle, informationMessage.c_str());
+    }
+}
 
 void createChattingFrame()
 {
-    CreateWindow("static", informationMessage.c_str(), WS_CHILD | WS_VISIBLE | SS_RIGHT | WS_BORDER | WS_VSCROLL,
+    editBoxOutputHandle = CreateWindow("edit", informationMessage.c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         15, 25, 455, 350, g_hWnd, (HMENU)IDC_CHATTING_BOX, hInst, NULL);
-    editBoxHandle = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | SS_RIGHT | WS_BORDER | ES_AUTOVSCROLL
+    editBoxInputHandle = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL | ES_MULTILINE
         , 15, 390, 405, 40, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
     CreateWindow("button", "전송", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 385, 50, 50, g_hWnd, (HMENU)IDC_SEND_MESSAGE, hInst, NULL);
 }
 
 void uploadChatting()
 {
-    SetFocus(editBoxHandle);
+    SetFocus(editBoxInputHandle);
     char tempChatMessage[PACKET_SIZE];
-    GetWindowText(editBoxHandle, tempChatMessage, PACKET_SIZE);
+    GetWindowText(editBoxInputHandle, tempChatMessage, PACKET_SIZE);
     if (0 == strlen(tempChatMessage))
         return;
+    
+    client->SendMessageToServer(tempChatMessage);
 
-    informationMessage += tempChatMessage;
-    informationMessage += "\n";
-    SetDlgItemText(g_hWnd, IDC_CHATTING_BOX, informationMessage.c_str());
-    SetWindowText(editBoxHandle, "");
+    informationMessage += client->RecvMessageFromServer();
+    SetWindowText(editBoxOutputHandle, informationMessage.c_str());
+    SetWindowText(editBoxInputHandle, "");
+
+    // scrollbar 자동 이동
+    SendMessageA(editBoxOutputHandle, EM_SETSEL, 0, -1); //Select all. 
+    SendMessageA(editBoxOutputHandle, EM_SETSEL, -1, -1);//Unselect and stay at the end pos
+    SendMessageA(editBoxOutputHandle, EM_SCROLLCARET, 0, 0); //Set scrollcaret to the current Pos
 }

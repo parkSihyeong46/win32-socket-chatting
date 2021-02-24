@@ -27,18 +27,12 @@
     <ClInclude Include="win32_socket_multi_chatting.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Server.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win32_socket_multi_chatting.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Server.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Client.cpp">
