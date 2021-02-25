@@ -9,15 +9,20 @@ using namespace std;
 
 #define PORT		4578
 #define PACKET_SIZE 1024
+#define MAXIMUM_CLIENT 8
 
-void SendMsg(string msg, int len);
-string RecvMsg();
+UINT WINAPI EchoThread(void* arg);
 
-SOCKET clientSocket;
+HANDLE hMutex;
+HANDLE EchoThreadHandle;
+SOCKET clientSockets[MAXIMUM_CLIENT];
+int clientSocketsLastIndex = 0;
+int connectClientNumber = 0;
 int strLen = 0;
 int main()
 {
 	WSADATA wsaData;
+	SOCKET clientSocket;
 
 	int err;
 	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -31,7 +36,7 @@ int main()
 	}
 
 	SOCKET serverSocket;
-	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);	// 통신 프로토콜 설정
 
 	SOCKADDR_IN serverAddress = {};
 	serverAddress.sin_family = AF_INET;
@@ -41,46 +46,32 @@ int main()
 	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// s_addr : IPv4 의미, INADDR_ANY : 현재 동작되는 컴퓨터의 IP주소
 	// sin_addr : IP 주소
 
-	if (-1 == bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress)))
+	if (-1 == bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress))) // 서버 측의 소켓에 IP와 포트를 할당하여 네트워크 인터페이스와 묶일 수 있도록 함
 	{
 		cout << "bind error : " << endl;
 		return 1;
 	}
-	// 서버 측의 소켓에 IP와 포트를 할당하여 네트워크 인터페이스와 묶일 수 있도록 함
+	
 	listen(serverSocket, SOMAXCONN);	// SOMAXCONN : 한꺼번에 요청 가능한 최대 접속 승인 수
 	// 클라이언트로 부터 연결 요청을 기다린다.
 
 	SOCKADDR_IN clientAddress = {};
 	// 클라이언트의 주소 정보를 받을 SOCKADDR_IN 생성
-	int clientAddressSize = sizeof(clientAddress);
-	clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressSize);
-	// accept() 를 이용해 클라이언트의 연결을 수락한다.
 
-	//char cBuffer[PACKET_SIZE] = {};
-	//recv(clientSocket, cBuffer, PACKET_SIZE, 0);
-	//// clientSocket 데이터 수신
-	//cout << "Recv Msg : " << cBuffer << endl;
-
-	//char cMsg[] = "Server Send";
-	//send(clientSocket, cMsg, strlen(cMsg), 0);
-	//// clientSocket 데이터 발신
-
+	hMutex = CreateMutex(NULL, false, NULL);	// 뮤텍스 생성, false라서 mutex 바로 실행 X
 	while (true)
 	{
-		string str = RecvMsg();
-		if (strLen != 0)
-		{
-			if (str == "q" || strLen == -1)
-				break;
-
-			SendMsg("Server Send : " + str + "\r\n", sizeof("Server Send : ") + strLen + sizeof("\r\n"));
-		}
-		else if (-1 == strLen)
-			break;
+		int clientAddressSize = sizeof(clientAddress);
+		clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressSize);	// accept() 를 이용해 클라이언트의 연결을 수락한다.
+		WaitForSingleObject(hMutex, INFINITE);									// 뮤텍스 실행
+		clientSockets[clientSocketsLastIndex++] = clientSocket;
+		ReleaseMutex(hMutex);															// 뮤텍스 종료
+		EchoThreadHandle = (HANDLE)_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread 실행
+		cout << "Connect Ip : " << clientAddress.sin_addr.s_addr << endl;
 	}
 
-	closesocket(clientSocket);
-	closesocket(serverSocket);
+	closesocket(serverSocket);	
+	// socket() 이용 했으니 close 처리
 
 	WSACleanup();
 	// Winsock2를 사용환경 종료
@@ -88,21 +79,41 @@ int main()
 	return 0;
 }
 
-void SendMsg(string msg, int len)
+UINT WINAPI EchoThread(void* arg)
 {
-	send(clientSocket, msg.c_str(), len, 0);
-}
-
-string RecvMsg()
-{
+	SOCKET clientSocket = *(SOCKET*)arg;
 	char cBuffer[PACKET_SIZE] = {};
-	strLen = 0;
-	strLen = recv(clientSocket, cBuffer, PACKET_SIZE, 0);
-	// 데이터 수신 시 -1 return 되면 해당 clientSocket과 연결이 끊어졌다는 소리, 따라서 처리 해줘야함
-	cout << strLen << endl;
 
-	if (strLen == -1)
-		strLen = -1;
+	while (recv(clientSocket, cBuffer, PACKET_SIZE, 0) != -1)
+	{
+		WaitForSingleObject(hMutex, INFINITE);
 
-	return cBuffer;
+		for (int i = 0; i < connectClientNumber; i++)
+		{
+			send(clientSockets[i], cBuffer, sizeof(cBuffer), 0);	// recv 문자 클라이언트 전체에게 send
+		}
+
+		ReleaseMutex(hMutex);
+	}
+
+	WaitForSingleObject(hMutex, INFINITE);
+	// recv -1 이니 서버와 연결 종료 상태
+	// client 제거 처리
+	for (int i = 0; i < connectClientNumber; i++)
+	{
+		if (clientSockets[i] == clientSocket)
+		{
+			while (i++ < connectClientNumber - 1)
+			{
+				clientSockets[i] = clientSockets[i + 1];
+			}
+			// 한칸씩 당겨와 재정렬
+		}
+	}
+
+
+	connectClientNumber--;
+	closesocket(clientSocket);
+	ReleaseMutex(hMutex);
+	return 0;
 }
