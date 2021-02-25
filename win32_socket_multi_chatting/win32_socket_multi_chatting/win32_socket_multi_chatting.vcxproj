@@ -156,6 +156,9 @@
     <Image Include="small.ico" />
     <Image Include="win32_socket_multi_chatting.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

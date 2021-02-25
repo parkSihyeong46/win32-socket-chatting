@@ -1,6 +1,7 @@
 ﻿#include "framework.h"
 #include "win32_socket_multi_chatting.h"
 #include <string>
+#include <process.h>
 #include "Client.h"
 
 using namespace std;
@@ -18,13 +19,14 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 Client* client;
+HANDLE hMutex;
 string informationMessage;
 HWND editBoxOutputHandle;
 HWND editBoxInputHandle;
 
-void ConnectInformationMessage();
 void createChattingFrame();
 void uploadChatting();
+UINT WINAPI ReceiveMessageThread(void* arg);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -106,7 +108,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_hWnd = hWnd;
         createChattingFrame();
         client = new Client();
-        ConnectInformationMessage();
+        hMutex = CreateMutex(NULL, false, NULL);
+        _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
         break;
     case WM_COMMAND:
         {
@@ -142,26 +145,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+        CloseHandle(hMutex);
         PostQuitMessage(0);
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
-}
-
-void ConnectInformationMessage()
-{
-    if (client->IsConnect())
-    {
-        informationMessage += "System Message : server connect\r\n";
-        SetWindowText(editBoxOutputHandle, informationMessage.c_str());
-    }
-    else
-    {
-        informationMessage += "System Message : lost server connect\r\n";
-        SetWindowText(editBoxOutputHandle, informationMessage.c_str());
-    }
 }
 
 void createChattingFrame()
@@ -182,13 +172,33 @@ void uploadChatting()
         return;
     
     client->SendMessageToServer(tempChatMessage);
-
-    informationMessage += client->RecvMessageFromServer();
-    SetWindowText(editBoxOutputHandle, informationMessage.c_str());
     SetWindowText(editBoxInputHandle, "");
 
     // scrollbar 자동 이동
     SendMessageA(editBoxOutputHandle, EM_SETSEL, 0, -1); //Select all. 
     SendMessageA(editBoxOutputHandle, EM_SETSEL, -1, -1);//Unselect and stay at the end pos
     SendMessageA(editBoxOutputHandle, EM_SCROLLCARET, 0, 0); //Set scrollcaret to the current Pos
+}
+
+UINT WINAPI ReceiveMessageThread(void* arg)
+{
+    bool loop = true;
+    string recvString;
+    while (loop)
+    {
+        recvString = client->RecvMessageFromServer();
+        if (recvString == "")
+            break;
+        else
+        {
+            WaitForSingleObject(hMutex, INFINITE);
+
+            informationMessage += recvString + "\r\n";
+            SetWindowText(editBoxOutputHandle, informationMessage.c_str());
+          
+            ReleaseMutex(hMutex);
+        }
+    }
+
+    return 0;
 }

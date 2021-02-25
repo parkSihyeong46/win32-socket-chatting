@@ -14,10 +14,8 @@ using namespace std;
 UINT WINAPI EchoThread(void* arg);
 
 HANDLE hMutex;
-HANDLE EchoThreadHandle;
 SOCKET clientSockets[MAXIMUM_CLIENT];
 int clientSocketsLastIndex = 0;
-int connectClientNumber = 0;
 int strLen = 0;
 int main()
 {
@@ -66,8 +64,8 @@ int main()
 		WaitForSingleObject(hMutex, INFINITE);									// 뮤텍스 실행
 		clientSockets[clientSocketsLastIndex++] = clientSocket;
 		ReleaseMutex(hMutex);															// 뮤텍스 종료
-		EchoThreadHandle = (HANDLE)_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread 실행
-		cout << "Connect Ip : " << clientAddress.sin_addr.s_addr << endl;
+		_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread 실행
+		cout << "Connect Ip : " << inet_ntoa(clientAddress.sin_addr) << endl;
 	}
 
 	closesocket(serverSocket);	
@@ -83,37 +81,39 @@ UINT WINAPI EchoThread(void* arg)
 {
 	SOCKET clientSocket = *(SOCKET*)arg;
 	char cBuffer[PACKET_SIZE] = {};
+	int strlen = 0;
 
-	while (recv(clientSocket, cBuffer, PACKET_SIZE, 0) != -1)
+	while ((strlen = recv(clientSocket, cBuffer, PACKET_SIZE, 0)) != -1 )
 	{
+		cout << cBuffer << endl;
 		WaitForSingleObject(hMutex, INFINITE);
 
-		for (int i = 0; i < connectClientNumber; i++)
+		for (int i = 0; i < clientSocketsLastIndex; i++)
 		{
-			send(clientSockets[i], cBuffer, sizeof(cBuffer), 0);	// recv 문자 클라이언트 전체에게 send
+			send(clientSockets[i], cBuffer, strlen, 0);	// recv 문자 클라이언트 전체에게 send
 		}
 
+		memset(cBuffer, NULL, PACKET_SIZE);
 		ReleaseMutex(hMutex);
 	}
 
 	WaitForSingleObject(hMutex, INFINITE);
 	// recv -1 이니 서버와 연결 종료 상태
 	// client 제거 처리
-	for (int i = 0; i < connectClientNumber; i++)
+	for (int i = 0; i < clientSocketsLastIndex; i++)
 	{
 		if (clientSockets[i] == clientSocket)
 		{
-			while (i++ < connectClientNumber - 1)
+			while (i++ < clientSocketsLastIndex - 1)
 			{
 				clientSockets[i] = clientSockets[i + 1];
 			}
 			// 한칸씩 당겨와 재정렬
 		}
 	}
-
-
-	connectClientNumber--;
-	closesocket(clientSocket);
+	
+	clientSocketsLastIndex--;
 	ReleaseMutex(hMutex);
+	closesocket(clientSocket);
 	return 0;
 }

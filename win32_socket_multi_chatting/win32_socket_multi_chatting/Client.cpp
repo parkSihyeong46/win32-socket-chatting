@@ -26,8 +26,6 @@ Client::Client()
 		ErrorMsg("connect " + to_string(connectResult));
 		return;
 	}
-
-	isConnect = true;
 }
 
 Client::~Client()
@@ -36,35 +34,18 @@ Client::~Client()
 	WSACleanup();
 }
 
-void Client::Run()
-{
-	// recv thread
-}
-
 void Client::SendMessageToServer(string chattingMsg)
 {
-	if (!isConnect)
-		return;
-
-	int sendResult = 0;
-	sendResult = send(clientSocket, chattingMsg.c_str(), chattingMsg.size(), 0);
+	if(send(clientSocket, chattingMsg.c_str(), chattingMsg.size(), 0) == -1)
+		ErrorMsg("send Error ");
 }
 
 string Client::RecvMessageFromServer()
 {
-	if (!isConnect)
-	{
-		return "Server Connect Lost\r\n";
-	}
-
 	char recvMessage[PACKET_SIZE] = {};
-	int strLen = 0;
-	strLen = recv(clientSocket, recvMessage, PACKET_SIZE,0);
 
-	if (strLen == -1)
+	if (recv(clientSocket, recvMessage, PACKET_SIZE, 0) == -1)
 	{
-		isConnect = false;
-
 		ErrorMsg("recv Error ");
 		closesocket(clientSocket);
 		WSACleanup();
@@ -78,9 +59,4 @@ void Client::ErrorMsg(const string errorMsg)
 {
 	string errMsg = "Error Message : ";
 	MessageBox(g_hWnd, (errMsg + errorMsg).c_str(), "Error Message", MB_OK);
-}
-
-const bool Client::IsConnect()
-{
-	return isConnect;
 }
