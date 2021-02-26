@@ -40,8 +40,15 @@ void Client::SendMessageToServer(string chattingMsg)
 		ErrorMsg("send Error ");
 }
 
+void Client::SendMessageToServer(GiftData giftData)
+{
+	if (send(clientSocket, (char*)&giftData, sizeof(giftData), 0) == -1)
+		ErrorMsg("send Error ");
+}
+
 string Client::RecvMessageFromServer()
 {
+	string str;
 	char recvMessage[PACKET_SIZE] = {};
 
 	if (recv(clientSocket, recvMessage, PACKET_SIZE, 0) == -1)
@@ -51,6 +58,15 @@ string Client::RecvMessageFromServer()
 		WSACleanup();
 		return "";
 	}
+	
+	// switch문으로 구분
+
+	GiftData* recvGiftData = (GiftData*)recvMessage;
+
+	str += to_string(recvGiftData->price) + "가격의 " +
+		recvGiftData->name + "을 보냈습니다!" + "\r\n" +
+		"(만료기간은 " + to_string(recvGiftData->validity) + " 입니다.)";
+
 
 	return recvMessage;
 }

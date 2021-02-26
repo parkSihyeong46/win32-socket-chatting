@@ -11,6 +11,13 @@ using namespace std;
 #define PACKET_SIZE 1024
 #define MAXIMUM_CLIENT 8
 
+typedef struct GiftData
+{
+	int price;		// 가격
+	string name;	// 상품명
+	float validity;	// 유효기간
+} giftData;
+
 UINT WINAPI EchoThread(void* arg);
 
 HANDLE hMutex;
