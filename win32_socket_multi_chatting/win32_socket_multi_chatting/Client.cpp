@@ -2,8 +2,10 @@
 
 extern HWND g_hWnd;
 
-Client::Client()
+Client::Client(string name)
 {
+	this->name = name;
+
 	WSADATA wsaData;
 	int wsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -61,14 +63,19 @@ string Client::RecvMessageFromServer()
 	
 	// switch문으로 구분
 
-	GiftData* recvGiftData = (GiftData*)recvMessage;
+	/*GiftData* recvGiftData = (GiftData*)recvMessage;
 
 	str += to_string(recvGiftData->price) + "가격의 " +
 		recvGiftData->name + "을 보냈습니다!" + "\r\n" +
-		"(만료기간은 " + to_string(recvGiftData->validity) + " 입니다.)";
+		"(만료기간은 " + to_string(recvGiftData->validity) + " 입니다.)";*/
 
 
 	return recvMessage;
+}
+
+const string Client::GetName()
+{
+	return name;
 }
 
 void Client::ErrorMsg(const string errorMsg)

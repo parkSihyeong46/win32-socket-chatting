@@ -8,6 +8,7 @@ using namespace std;
 
 #define MAX_LOADSTRING 100
 #define PACKET_SIZE 1024
+#define MAX_NAME_LENGTH 100
 
 HWND g_hWnd;
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -21,13 +22,19 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 Client* client;
 HANDLE hMutex;
 string informationMessage;
+HWND editboxClientName;
+HWND connectButton;
+
 HWND editBoxOutputHandle;
 HWND editBoxInputHandle;
-string clientName;
 
 void CreateLobbyFrame();
+void HideLobbyFrame();
 void CreateChattingFrame();
 void UploadChatting();
+
+void MoveScrollbarToEnd(HWND hwnd);
+
 UINT WINAPI ReceiveMessageThread(void* arg);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -117,8 +124,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDC_CONNECT_ROOM:
+                char clientName[MAX_NAME_LENGTH];
+                GetWindowText(editboxClientName, clientName, MAX_NAME_LENGTH);
+
+                HideLobbyFrame();
+
                 CreateChattingFrame();
-                client = new Client();
+                client = new Client(clientName);
                 hMutex = CreateMutex(NULL, false, NULL);
                 _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
                 break;
@@ -163,9 +175,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void CreateLobbyFrame()
 {
-    CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER
+    editboxClientName = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER
         , 200, 150, 100, 30, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
-    CreateWindow("button", "입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 200, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM, hInst, NULL);
+    connectButton = CreateWindow("button", "입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 200, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM, hInst, NULL);
+}
+
+void HideLobbyFrame()
+{
+    ShowWindow(editboxClientName, SW_HIDE);
+    ShowWindow(connectButton, SW_HIDE);
 }
 
 void CreateChattingFrame()
@@ -185,13 +203,22 @@ void UploadChatting()
     if (0 == strlen(tempChatMessage))
         return;
     
-    client->SendMessageToServer(tempChatMessage);
+    char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
+    strcpy(chatMessage, client->GetName().c_str());
+    strcat(chatMessage, " : ");
+    strcat(chatMessage, tempChatMessage);
+    client->SendMessageToServer(chatMessage);
     SetWindowText(editBoxInputHandle, "");
 
     // scrollbar 자동 이동
-    SendMessageA(editBoxOutputHandle, EM_SETSEL, 0, -1); //Select all. 
-    SendMessageA(editBoxOutputHandle, EM_SETSEL, -1, -1);//Unselect and stay at the end pos
-    SendMessageA(editBoxOutputHandle, EM_SCROLLCARET, 0, 0); //Set scrollcaret to the current Pos
+    MoveScrollbarToEnd(editBoxOutputHandle);
+}
+
+void MoveScrollbarToEnd(HWND hwnd)
+{
+    SendMessageA(hwnd, EM_SETSEL, 0, -1); //Select all. 
+    SendMessageA(hwnd, EM_SETSEL, -1, -1);//Unselect and stay at the end pos
+    SendMessageA(hwnd, EM_SCROLLCARET, -1, -1); //Set scrollcaret to the current Pos
 }
 
 UINT WINAPI ReceiveMessageThread(void* arg)
@@ -209,6 +236,9 @@ UINT WINAPI ReceiveMessageThread(void* arg)
 
             informationMessage += recvString + "\r\n";
             SetWindowText(editBoxOutputHandle, informationMessage.c_str());
+
+            // scrollbar 자동 이동
+            MoveScrollbarToEnd(editBoxOutputHandle);
           
             ReleaseMutex(hMutex);
         }

@@ -25,14 +25,18 @@ enum SendMessageKind
 class Client
 {
 private:
+	string name;
+
 	SOCKET clientSocket;
 public:
-	Client();
+	Client(string name);
 	~Client();
 
 	void SendMessageToServer(string chattingMsg);
 	void SendMessageToServer(GiftData giftData);
 	string RecvMessageFromServer();
+
+	const string GetName();
 
 	void ErrorMsg(const string errorMsg);
 };

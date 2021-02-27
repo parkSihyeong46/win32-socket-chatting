@@ -9,6 +9,7 @@ using namespace std;
 
 #define PORT		4578
 #define PACKET_SIZE 1024
+#define MAX_NAME_LENGTH 100
 #define MAXIMUM_CLIENT 8
 
 typedef struct GiftData
@@ -87,10 +88,10 @@ int main()
 UINT WINAPI EchoThread(void* arg)
 {
 	SOCKET clientSocket = *(SOCKET*)arg;
-	char cBuffer[PACKET_SIZE] = {};
+	char cBuffer[PACKET_SIZE + MAX_NAME_LENGTH] = {};
 	int strlen = 0;
 
-	while ((strlen = recv(clientSocket, cBuffer, PACKET_SIZE, 0)) != -1 )
+	while ((strlen = recv(clientSocket, cBuffer, PACKET_SIZE + MAX_NAME_LENGTH, 0)) != -1 )
 	{
 		cout << cBuffer << endl;
 		WaitForSingleObject(hMutex, INFINITE);
