@@ -23,9 +23,11 @@ HANDLE hMutex;
 string informationMessage;
 HWND editBoxOutputHandle;
 HWND editBoxInputHandle;
+string clientName;
 
-void createChattingFrame();
-void uploadChatting();
+void CreateLobbyFrame();
+void CreateChattingFrame();
+void UploadChatting();
 UINT WINAPI ReceiveMessageThread(void* arg);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -106,10 +108,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         g_hWnd = hWnd;
-        createChattingFrame();
-        client = new Client();
-        hMutex = CreateMutex(NULL, false, NULL);
-        _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+        CreateLobbyFrame();
         break;
     case WM_COMMAND:
         {
@@ -117,10 +116,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             switch (wmId)
             {
+            case IDC_CONNECT_ROOM:
+                CreateChattingFrame();
+                client = new Client();
+                hMutex = CreateMutex(NULL, false, NULL);
+                _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+                break;
             case IDC_EDIT_BOX: 
                 break;
             case IDC_SEND_MESSAGE:
-                uploadChatting();
+                UploadChatting();
                 break;
             /*case IDC_CREATE_ROOM:
                 MessageBox(hWnd, "test", "제목", 0);
@@ -145,6 +150,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+        delete client;
+
         CloseHandle(hMutex);
         PostQuitMessage(0);
         break;
@@ -154,7 +161,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void createChattingFrame()
+void CreateLobbyFrame()
+{
+    CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER
+        , 200, 150, 100, 30, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
+    CreateWindow("button", "입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 200, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM, hInst, NULL);
+}
+
+void CreateChattingFrame()
 {
     editBoxOutputHandle = CreateWindow("edit", informationMessage.c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         15, 25, 455, 350, g_hWnd, (HMENU)IDC_CHATTING_BOX, hInst, NULL);
@@ -163,7 +177,7 @@ void createChattingFrame()
     CreateWindow("button", "전송", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 385, 50, 50, g_hWnd, (HMENU)IDC_SEND_MESSAGE, hInst, NULL);
 }
 
-void uploadChatting()
+void UploadChatting()
 {
     SetFocus(editBoxInputHandle);
     char tempChatMessage[PACKET_SIZE];
