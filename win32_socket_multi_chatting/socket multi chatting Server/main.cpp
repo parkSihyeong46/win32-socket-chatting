@@ -11,14 +11,26 @@ using namespace std;
 #define PACKET_SIZE 1024
 #define MAX_NAME_LENGTH 100
 #define MAXIMUM_CLIENT 8
-#define MAX_DATA_HEADER_LENGTH 10
+#define HEADER_SIZE 10
 
-typedef struct GiftDatas
+typedef struct
+{
+	char kind;
+	int dataSize;
+} header_t;
+
+typedef struct
+{
+	header_t header;
+	char data[PACKET_SIZE - sizeof(header_t)];
+} packet_t;
+
+typedef struct
 {
 	int price;		// 가격
 	string name;	// 상품명
 	float validity;	// 유효기간
-} GiftData;
+} giftData_t;
 
 enum SendMessageKind
 {
@@ -27,6 +39,8 @@ enum SendMessageKind
 };
 
 UINT WINAPI EchoThread(void* arg);
+void SendClientMessage(string msg);
+void SendServerMessage(string msg);
 
 HANDLE hMutex;
 SOCKET clientSockets[MAXIMUM_CLIENT];
@@ -96,31 +110,37 @@ UINT WINAPI EchoThread(void* arg)
 {
 	SOCKET clientSocket = *(SOCKET*)arg;
 	char cBuffer[PACKET_SIZE + MAX_NAME_LENGTH] = {};
-	int strlen = 0;
+	giftData_t* giftData = nullptr;
+	packet_t* packet = nullptr;
+	char* tempChar = nullptr;
 
-	while ((strlen = recv(clientSocket, cBuffer, PACKET_SIZE + MAX_NAME_LENGTH, 0)) != -1 )
-	{
-		cout << cBuffer << endl;
+	while ((recv(clientSocket, cBuffer, PACKET_SIZE, 0)) != -1 )
+	{	
 		WaitForSingleObject(hMutex, INFINITE);
 
-		char * headerData = strtok(cBuffer, " ");
-		char* bodyData = strtok(NULL, " ");
-		switch (atoi(headerData))
+		packet = (packet_t*)cBuffer;
+		cout << packet->data << endl;
+
+		switch ((int)packet->header.kind - 48)
 		{
 		case COMMON:
+			SendClientMessage(packet->data);
 			break;
 		case GIFT:
-			GiftData* giftData = (GiftData*)bodyData;
-			string str;
-			str = to_string(giftData->price) + " 가격의 " +
-				giftData->name + " 을 보냈습니다! (만료기간은 " + to_string(giftData->validity) + " 입니다.)";
-			strcpy(cBuffer, str.c_str());
-			break;
-		}
+			tempChar = new char[packet->header.dataSize];
 
-		for (int i = 0; i < clientSocketsLastIndex; i++)
-		{
-			send(clientSockets[i], bodyData, strlen, 0);	// recv 문자 클라이언트 전체에게 send
+			strncpy(tempChar, packet->data, packet->header.dataSize);
+			giftData = (giftData_t*)tempChar;
+
+			SendServerMessage("user1 님이 " + to_string(giftData->price) + " 가격의 " +
+				giftData->name + "을 보냈습니다! (만료기간 : " + to_string(giftData->price) +
+				" 입니다.)");
+
+			delete[] tempChar;
+			break;
+		default:
+			cout << packet->header.kind << " 수신오류 확인바람" << endl;
+			continue;
 		}
 
 		memset(cBuffer, NULL, PACKET_SIZE);
@@ -146,4 +166,21 @@ UINT WINAPI EchoThread(void* arg)
 	ReleaseMutex(hMutex);
 	closesocket(clientSocket);
 	return 0;
+}
+void SendClientMessage(string msg)
+{
+	string clientMsg = "user1 : " + msg;
+
+	for (int i = 0; i < clientSocketsLastIndex; i++)
+	{
+		send(clientSockets[i], clientMsg.c_str(), clientMsg.size(), 0);
+	}
+}
+
+void SendServerMessage(string msg)
+{
+	for (int i = 0; i < clientSocketsLastIndex; i++)
+	{
+		send(clientSockets[i], msg.c_str(), msg.size(), 0);
+	}
 }

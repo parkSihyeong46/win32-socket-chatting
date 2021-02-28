@@ -20,13 +20,14 @@
 #define IDC_CHATTING_BOX						110
 #define IDC_EDIT_BOX							111
 #define IDC_SEND_MESSAGE						112
-#define IDC_CREATE_ROOM							113
-#define IDC_CONNECT_ROOM						114
+#define IDC_SEND_GIFT							113
+#define IDC_CREATE_ROOM							114
+#define IDC_CONNECT_ROOM						115
 
 #define MAX_LOADSTRING 100
 #define PACKET_SIZE 1024
 #define MAX_NAME_LENGTH 100
-#define MAX_DATA_HEADER_LENGTH 10
+#define HEADER_SIZE 10
 
 // 다음은 새 개체에 사용할 기본값입니다.
 //

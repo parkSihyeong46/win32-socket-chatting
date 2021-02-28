@@ -92,7 +92,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 500, 500, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, 500, 550, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -113,14 +113,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_hWnd = hWnd;
         CreateLobbyFrame();
         break;
-   /* case WM_KEYDOWN:
-        switch (wParam)
-        {
-        case VK_F1:
-            UploadChatting(GIFT);
-            break;
-        }
-        break;*/
     case WM_COMMAND:
         {
             switch (LOWORD(wParam))
@@ -139,6 +131,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDC_EDIT_BOX: 
                 break;
             case IDC_SEND_MESSAGE:
+                UploadChatting(COMMON);
+                break;
+            case IDC_SEND_GIFT:
                 UploadChatting(GIFT);
                 break;
             /*case IDC_CREATE_ROOM:
@@ -189,9 +184,10 @@ void CreateChattingFrame()
 {
     editBoxOutputHandle = CreateWindow("edit", informationMessage.c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         15, 25, 455, 350, g_hWnd, (HMENU)IDC_CHATTING_BOX, hInst, NULL);
-    editBoxInputHandle = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL | ES_MULTILINE
-        , 15, 390, 405, 40, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
+    editBoxInputHandle = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL | ES_MULTILINE | WS_VSCROLL
+        , 15, 390, 405, 90, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
     CreateWindow("button", "전송", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 385, 50, 50, g_hWnd, (HMENU)IDC_SEND_MESSAGE, hInst, NULL);
+    CreateWindow("button", "선물", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 450, 50, 50, g_hWnd, (HMENU)IDC_SEND_GIFT, hInst, NULL);
 }
 
 void UploadChatting(const int kind)
@@ -199,15 +195,15 @@ void UploadChatting(const int kind)
     SetFocus(editBoxInputHandle);
     char tempChatMessage[PACKET_SIZE];
     GetWindowText(editBoxInputHandle, tempChatMessage, PACKET_SIZE);
-    if (0 == strlen(tempChatMessage))
-        return;
     
     char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
     switch (kind)
     {
     case COMMON:
-        SetWindowText(editBoxInputHandle, "");
+        if (0 == strlen(tempChatMessage))
+            return;
 
+        SetWindowText(editBoxInputHandle, "");
         client->SendMessageToServer(tempChatMessage);
         break;
     case GIFT:

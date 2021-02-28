@@ -43,25 +43,23 @@ Client::~Client()
 
 void Client::SendMessageToServer(string chattingMsg)
 {
-	char head[MAX_DATA_HEADER_LENGTH] = "0 ";
-	char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
-	strcpy(chatMessage, head);
-	strcat(chatMessage, name.c_str());
-	strcat(chatMessage, " : ");
-	strcat(chatMessage, chattingMsg.c_str());
+	packet_t packet;
+	packet.header.kind = '0';
+	packet.header.dataSize = chattingMsg.size();
+	strcpy(packet.data, chattingMsg.c_str());
 
-	if(send(clientSocket, chatMessage, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
+	if(send(clientSocket, (char*)&packet, PACKET_SIZE, 0) == -1)
 		ErrorMsg("send Error ");
 }
 
 void Client::SendMessageToServer()
 {
-	char head[MAX_DATA_HEADER_LENGTH] = "0 ";
-	char sendData[PACKET_SIZE + MAX_NAME_LENGTH];
-	strcpy(sendData, head);
-	strcat(sendData, (char*)&giftData);
+	packet_t packet;
+	packet.header.kind = '1';
+	packet.header.dataSize = sizeof(giftData_t);
+	strcpy(packet.data, (char*)&giftData);
 
-	if (send(clientSocket, sendData, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
+	if (send(clientSocket, (char*)&packet, PACKET_SIZE, 0) == -1)
 		ErrorMsg("send Error ");
 }
 
@@ -77,15 +75,6 @@ string Client::RecvMessageFromServer()
 		WSACleanup();
 		return "";
 	}
-	
-	// switch문으로 구분
-
-	/*GiftData* recvGiftData = (GiftData*)recvMessage;
-
-	str += to_string(recvGiftData->price) + "가격의 " +
-		recvGiftData->name + "을 보냈습니다!" + "\r\n" +
-		"(만료기간은 " + to_string(recvGiftData->validity) + " 입니다.)";*/
-
 
 	return recvMessage;
 }
@@ -95,7 +84,7 @@ const string Client::GetName()
 	return name;
 }
 
-GiftDatas Client::GetGiftData()
+giftData_t Client::GetGiftData()
 {
 	return giftData;
 }

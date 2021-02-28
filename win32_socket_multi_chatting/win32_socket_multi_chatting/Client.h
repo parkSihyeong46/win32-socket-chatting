@@ -10,12 +10,24 @@ using namespace std;
 constexpr const int SERVER_PORT = 4578;
 constexpr const char* SERVER_IP = "192.168.123.101";
 
-typedef struct GiftDatas
+typedef struct
+{
+	char kind;
+	int dataSize;
+} header_t;
+
+typedef struct
+{
+	header_t header;
+	char data[PACKET_SIZE - sizeof(header_t)];
+} packet_t;
+
+typedef struct
 {
 	int price;		// 가격
 	string name;	// 상품명
 	float validity;	// 유효기간
-} GiftData;
+} giftData_t;
 
 enum SendMessageKind
 {
@@ -27,7 +39,7 @@ class Client
 {
 private:
 	string name;
-	GiftDatas giftData;
+	giftData_t giftData;
 
 	SOCKET clientSocket;
 public:
@@ -39,7 +51,7 @@ public:
 	string RecvMessageFromServer();
 
 	const string GetName();
-	GiftDatas GetGiftData();
+	giftData_t GetGiftData();
 
 	void ErrorMsg(const string errorMsg);
 };
