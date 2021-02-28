@@ -6,6 +6,11 @@ Client::Client(string name)
 {
 	this->name = name;
 
+	// test data
+	giftData.price = 100;
+	giftData.name = "초콜릿";
+	giftData.validity = 10.5f;
+
 	WSADATA wsaData;
 	int wsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -38,22 +43,34 @@ Client::~Client()
 
 void Client::SendMessageToServer(string chattingMsg)
 {
-	if(send(clientSocket, chattingMsg.c_str(), chattingMsg.size(), 0) == -1)
+	char head[MAX_DATA_HEADER_LENGTH] = "0 ";
+	char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
+	strcpy(chatMessage, head);
+	strcat(chatMessage, name.c_str());
+	strcat(chatMessage, " : ");
+	strcat(chatMessage, chattingMsg.c_str());
+
+	if(send(clientSocket, chatMessage, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
 		ErrorMsg("send Error ");
 }
 
-void Client::SendMessageToServer(GiftData giftData)
+void Client::SendMessageToServer()
 {
-	if (send(clientSocket, (char*)&giftData, sizeof(giftData), 0) == -1)
+	char head[MAX_DATA_HEADER_LENGTH] = "0 ";
+	char sendData[PACKET_SIZE + MAX_NAME_LENGTH];
+	strcpy(sendData, head);
+	strcat(sendData, (char*)&giftData);
+
+	if (send(clientSocket, sendData, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
 		ErrorMsg("send Error ");
 }
 
 string Client::RecvMessageFromServer()
 {
 	string str;
-	char recvMessage[PACKET_SIZE] = {};
+	char recvMessage[PACKET_SIZE + MAX_NAME_LENGTH] = {};
 
-	if (recv(clientSocket, recvMessage, PACKET_SIZE, 0) == -1)
+	if (recv(clientSocket, recvMessage, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
 	{
 		ErrorMsg("recv Error ");
 		closesocket(clientSocket);
@@ -76,6 +93,11 @@ string Client::RecvMessageFromServer()
 const string Client::GetName()
 {
 	return name;
+}
+
+GiftDatas Client::GetGiftData()
+{
+	return giftData;
 }
 
 void Client::ErrorMsg(const string errorMsg)

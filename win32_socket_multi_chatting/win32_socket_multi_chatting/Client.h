@@ -1,13 +1,14 @@
 ﻿#pragma once
 #include <WinSock2.h>
 #include <string>
+#include <list>
+#include "Resource.h"
 
 #pragma comment(lib, "ws2_32")
 using namespace std;
 
 constexpr const int SERVER_PORT = 4578;
 constexpr const char* SERVER_IP = "192.168.123.101";
-constexpr const int PACKET_SIZE = 1024;
 
 typedef struct GiftDatas
 {
@@ -26,6 +27,7 @@ class Client
 {
 private:
 	string name;
+	GiftDatas giftData;
 
 	SOCKET clientSocket;
 public:
@@ -33,10 +35,11 @@ public:
 	~Client();
 
 	void SendMessageToServer(string chattingMsg);
-	void SendMessageToServer(GiftData giftData);
+	void SendMessageToServer();
 	string RecvMessageFromServer();
 
 	const string GetName();
+	GiftDatas GetGiftData();
 
 	void ErrorMsg(const string errorMsg);
 };

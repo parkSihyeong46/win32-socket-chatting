@@ -22,8 +22,15 @@
 #define IDC_SEND_MESSAGE						112
 #define IDC_CREATE_ROOM							113
 #define IDC_CONNECT_ROOM						114
+
+#define MAX_LOADSTRING 100
+#define PACKET_SIZE 1024
+#define MAX_NAME_LENGTH 100
+#define MAX_DATA_HEADER_LENGTH 10
+
 // 다음은 새 개체에 사용할 기본값입니다.
 //
+
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 

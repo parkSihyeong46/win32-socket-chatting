@@ -11,13 +11,20 @@ using namespace std;
 #define PACKET_SIZE 1024
 #define MAX_NAME_LENGTH 100
 #define MAXIMUM_CLIENT 8
+#define MAX_DATA_HEADER_LENGTH 10
 
-typedef struct GiftData
+typedef struct GiftDatas
 {
 	int price;		// 가격
 	string name;	// 상품명
 	float validity;	// 유효기간
-} giftData;
+} GiftData;
+
+enum SendMessageKind
+{
+	COMMON,
+	GIFT,
+};
 
 UINT WINAPI EchoThread(void* arg);
 
@@ -96,9 +103,24 @@ UINT WINAPI EchoThread(void* arg)
 		cout << cBuffer << endl;
 		WaitForSingleObject(hMutex, INFINITE);
 
+		char * headerData = strtok(cBuffer, " ");
+		char* bodyData = strtok(NULL, " ");
+		switch (atoi(headerData))
+		{
+		case COMMON:
+			break;
+		case GIFT:
+			GiftData* giftData = (GiftData*)bodyData;
+			string str;
+			str = to_string(giftData->price) + " 가격의 " +
+				giftData->name + " 을 보냈습니다! (만료기간은 " + to_string(giftData->validity) + " 입니다.)";
+			strcpy(cBuffer, str.c_str());
+			break;
+		}
+
 		for (int i = 0; i < clientSocketsLastIndex; i++)
 		{
-			send(clientSockets[i], cBuffer, strlen, 0);	// recv 문자 클라이언트 전체에게 send
+			send(clientSockets[i], bodyData, strlen, 0);	// recv 문자 클라이언트 전체에게 send
 		}
 
 		memset(cBuffer, NULL, PACKET_SIZE);

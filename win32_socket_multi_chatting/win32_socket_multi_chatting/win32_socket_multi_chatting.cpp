@@ -6,10 +6,6 @@
 
 using namespace std;
 
-#define MAX_LOADSTRING 100
-#define PACKET_SIZE 1024
-#define MAX_NAME_LENGTH 100
-
 HWND g_hWnd;
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
@@ -31,7 +27,7 @@ HWND editBoxInputHandle;
 void CreateLobbyFrame();
 void HideLobbyFrame();
 void CreateChattingFrame();
-void UploadChatting();
+void UploadChatting(const int kind);
 
 void MoveScrollbarToEnd(HWND hwnd);
 
@@ -117,11 +113,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_hWnd = hWnd;
         CreateLobbyFrame();
         break;
+   /* case WM_KEYDOWN:
+        switch (wParam)
+        {
+        case VK_F1:
+            UploadChatting(GIFT);
+            break;
+        }
+        break;*/
     case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
-
-            switch (wmId)
+            switch (LOWORD(wParam))
             {
             case IDC_CONNECT_ROOM:
                 char clientName[MAX_NAME_LENGTH];
@@ -137,14 +139,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDC_EDIT_BOX: 
                 break;
             case IDC_SEND_MESSAGE:
-                UploadChatting();
+                UploadChatting(GIFT);
                 break;
             /*case IDC_CREATE_ROOM:
                 MessageBox(hWnd, "test", "제목", 0);
                 break;
-            case IDC_CONNECT_ROOM:
-                MessageBox(hWnd, "test", "제목", 0);
-                break;*/
+                */
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -157,7 +157,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-
             EndPaint(hWnd, &ps);
         }
         break;
@@ -195,7 +194,7 @@ void CreateChattingFrame()
     CreateWindow("button", "전송", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 385, 50, 50, g_hWnd, (HMENU)IDC_SEND_MESSAGE, hInst, NULL);
 }
 
-void UploadChatting()
+void UploadChatting(const int kind)
 {
     SetFocus(editBoxInputHandle);
     char tempChatMessage[PACKET_SIZE];
@@ -204,11 +203,21 @@ void UploadChatting()
         return;
     
     char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
-    strcpy(chatMessage, client->GetName().c_str());
-    strcat(chatMessage, " : ");
-    strcat(chatMessage, tempChatMessage);
-    client->SendMessageToServer(chatMessage);
-    SetWindowText(editBoxInputHandle, "");
+    switch (kind)
+    {
+    case COMMON:
+        SetWindowText(editBoxInputHandle, "");
+
+        client->SendMessageToServer(tempChatMessage);
+        break;
+    case GIFT:
+        client->SendMessageToServer();
+        break;
+    default:
+        MessageBox(g_hWnd, "UploadChatting() default error", "UploadChatting() default error", 0);
+        return;
+    }
+
 
     // scrollbar 자동 이동
     MoveScrollbarToEnd(editBoxOutputHandle);
