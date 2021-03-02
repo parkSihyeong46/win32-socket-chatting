@@ -22,7 +22,8 @@
 #define IDC_SEND_MESSAGE						112
 #define IDC_SEND_GIFT							113
 #define IDC_CREATE_ROOM							114
-#define IDC_CONNECT_ROOM						115
+#define IDC_CONNECT_ROOM0						115
+#define IDC_CONNECT_ROOM1						116
 
 #define MAX_LOADSTRING 100
 #define PACKET_SIZE 1024

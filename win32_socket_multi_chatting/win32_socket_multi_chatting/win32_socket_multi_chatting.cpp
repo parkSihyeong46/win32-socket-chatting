@@ -19,7 +19,7 @@ Client* client;
 HANDLE hMutex;
 string informationMessage;
 HWND editboxClientName;
-HWND connectButton;
+HWND connectRoomButton[2];
 
 HWND editBoxOutputHandle;
 HWND editBoxInputHandle;
@@ -117,7 +117,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             switch (LOWORD(wParam))
             {
-            case IDC_CONNECT_ROOM:
+            case IDC_CONNECT_ROOM0:
+            case IDC_CONNECT_ROOM1:
                 char clientName[MAX_NAME_LENGTH];
                 GetWindowText(editboxClientName, clientName, MAX_NAME_LENGTH);
 
@@ -169,15 +170,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void CreateLobbyFrame()
 {
+    SetWindowText(CreateWindow("static", NULL, WS_CHILD | WS_VISIBLE , 220, 120, 50, 20, g_hWnd, NULL, hInst, NULL), "닉네임");
+
     editboxClientName = CreateWindow("edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER
         , 200, 150, 100, 30, g_hWnd, (HMENU)IDC_EDIT_BOX, hInst, NULL);
-    connectButton = CreateWindow("button", "입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 200, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM, hInst, NULL);
+    connectRoomButton[0] = CreateWindow("button", "채팅방1 입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 120, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM0, hInst, NULL);
+    connectRoomButton[1] = CreateWindow("button", "채팅방2 입장", WS_CHILD | WS_VISIBLE | WS_BORDER, 280, 230, 100, 50, g_hWnd, (HMENU)IDC_CONNECT_ROOM1, hInst, NULL);
 }
 
 void HideLobbyFrame()
 {
     ShowWindow(editboxClientName, SW_HIDE);
-    ShowWindow(connectButton, SW_HIDE);
+    ShowWindow(connectRoomButton[0], SW_HIDE);
+    ShowWindow(connectRoomButton[1], SW_HIDE);
 }
 
 void CreateChattingFrame()

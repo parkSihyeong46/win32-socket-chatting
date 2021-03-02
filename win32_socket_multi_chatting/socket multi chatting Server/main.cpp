@@ -1,42 +1,11 @@
 #include <iostream>
 #include <WinSock2.h>
 #include <process.h>
-#include <string>
-
-using namespace std;
+#include <list>
+#include "ConstData.h"
+#include "ChatRoom.h"
 
 #pragma comment(lib, "ws2_32")
-
-#define PORT		4578
-#define PACKET_SIZE 1024
-#define MAX_NAME_LENGTH 100
-#define MAXIMUM_CLIENT 8
-#define HEADER_SIZE 10
-
-typedef struct
-{
-	char kind;
-	int dataSize;
-} header_t;
-
-typedef struct
-{
-	header_t header;
-	char data[PACKET_SIZE - sizeof(header_t)];
-} packet_t;
-
-typedef struct
-{
-	int price;		// 가격
-	string name;	// 상품명
-	float validity;	// 유효기간
-} giftData_t;
-
-enum SendMessageKind
-{
-	COMMON,
-	GIFT,
-};
 
 UINT WINAPI EchoThread(void* arg);
 void SendClientMessage(string msg);
@@ -44,6 +13,7 @@ void SendServerMessage(string msg);
 
 HANDLE hMutex;
 SOCKET clientSockets[MAXIMUM_CLIENT];
+
 int clientSocketsLastIndex = 0;
 int strLen = 0;
 int main()
@@ -92,6 +62,7 @@ int main()
 		clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressSize);	// accept() 를 이용해 클라이언트의 연결을 수락한다.
 		WaitForSingleObject(hMutex, INFINITE);									// 뮤텍스 실행
 		clientSockets[clientSocketsLastIndex++] = clientSocket;
+
 		ReleaseMutex(hMutex);															// 뮤텍스 종료
 		_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread 실행
 		cout << "Connect Ip : " << inet_ntoa(clientAddress.sin_addr) << endl;
@@ -124,7 +95,7 @@ UINT WINAPI EchoThread(void* arg)
 		switch ((int)packet->header.kind - 48)
 		{
 		case COMMON:
-			SendClientMessage(packet->data);
+			SendClientMessage(packet->header.name + " : " + packet->data);
 			break;
 		case GIFT:
 			tempChar = new char[packet->header.dataSize];
@@ -132,8 +103,8 @@ UINT WINAPI EchoThread(void* arg)
 			strncpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 
-			SendServerMessage("user1 님이 " + to_string(giftData->price) + " 가격의 " +
-				giftData->name + "을 보냈습니다! (만료기간 : " + to_string(giftData->price) +
+			SendServerMessage(packet->header.name + " 님이 " + to_string(giftData->price) + " 가격의 " +
+				giftData->name + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
 				" 입니다.)");
 
 			delete[] tempChar;
@@ -169,11 +140,9 @@ UINT WINAPI EchoThread(void* arg)
 }
 void SendClientMessage(string msg)
 {
-	string clientMsg = "user1 : " + msg;
-
 	for (int i = 0; i < clientSocketsLastIndex; i++)
 	{
-		send(clientSockets[i], clientMsg.c_str(), clientMsg.size(), 0);
+		send(clientSockets[i], msg.c_str(), msg.size(), 0);
 	}
 }
 

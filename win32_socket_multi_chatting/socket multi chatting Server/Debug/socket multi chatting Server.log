@@ -1,1 +1,6 @@
-﻿  socket multi chatting Server.vcxproj -> C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\Debug\socket multi chatting Server.exe
+﻿  main.cpp
+C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(68,1): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\WinSock2.h(1849): message : 'inet_ntoa' 선언을 참조하십시오.
+C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(103,1): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(338): message : 'strncpy' 선언을 참조하십시오.
+  socket multi chatting Server.vcxproj -> C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\Debug\socket multi chatting Server.exe
