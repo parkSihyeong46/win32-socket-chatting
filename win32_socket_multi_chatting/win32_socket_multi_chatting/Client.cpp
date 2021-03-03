@@ -59,7 +59,7 @@ void Client::SendMessageToServer()
 	packet.header.kind = '1';
 	packet.header.name = name;
 	packet.header.dataSize = sizeof(giftData_t);
-	strcpy(packet.data, (char*)&giftData);
+	memcpy(packet.data, (char*)&giftData, sizeof(giftData_t));
 
 	if (send(clientSocket, (char*)&packet, PACKET_SIZE, 0) == -1)
 		ErrorMsg("send Error ");

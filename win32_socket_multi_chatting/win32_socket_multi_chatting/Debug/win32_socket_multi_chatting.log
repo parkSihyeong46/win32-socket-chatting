@@ -1,8 +1,7 @@
 ﻿  Client.cpp
-C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\Client.cpp(28,1): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\WinSock2.h(1831): message : 'inet_addr' 선언을 참조하십시오.
-C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\Client.cpp(50,1): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(133): message : 'strcpy' 선언을 참조하십시오.
-C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\Client.cpp(62,1): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(133): message : 'strcpy' 선언을 참조하십시오.
-  win32_socket_multi_chatting.vcxproj -> C:\Users\MJM\Desktop\GitTest\win32-socket-chatting\win32_socket_multi_chatting\Debug\win32_socket_multi_chatting.exe
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\Client.cpp(28,34): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\Client.cpp(50,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  win32_socket_multi_chatting.cpp
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\win32_socket_multi_chatting\win32_socket_multi_chatting.cpp(204,10): warning C4101: 'chatMessage' :참조되지 않은 지역 변수입니다.
+  코드를 생성하고 있습니다...
+  win32_socket_multi_chatting.vcxproj -> C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\Debug\win32_socket_multi_chatting.exe

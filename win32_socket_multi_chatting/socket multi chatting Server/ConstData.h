@@ -4,7 +4,6 @@ using namespace std;
 
 constexpr const int PORT =  4578;
 constexpr const int PACKET_SIZE = 1024;
-constexpr const int MAX_NAME_LENGTH = 100;
 constexpr const int MAXIMUM_CLIENT = 32;
 constexpr const int MAXIMUM_ROOM_CLIENT = 8;
 

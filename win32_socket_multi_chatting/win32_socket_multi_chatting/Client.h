@@ -8,7 +8,7 @@
 using namespace std;
 
 constexpr const int SERVER_PORT = 4578;
-constexpr const char* SERVER_IP = "203.232.193.171";
+constexpr const char* SERVER_IP = "192.168.123.101";
 
 typedef struct
 {

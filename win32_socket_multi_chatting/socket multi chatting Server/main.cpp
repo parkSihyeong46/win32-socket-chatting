@@ -80,12 +80,12 @@ int main()
 UINT WINAPI EchoThread(void* arg)
 {
 	SOCKET clientSocket = *(SOCKET*)arg;
-	char cBuffer[PACKET_SIZE + MAX_NAME_LENGTH] = {};
+	char cBuffer[PACKET_SIZE] = {};
 	giftData_t* giftData = nullptr;
 	packet_t* packet = nullptr;
 	char* tempChar = nullptr;
 
-	while ((recv(clientSocket, cBuffer, PACKET_SIZE, 0)) != -1 )
+	while (recv(clientSocket, cBuffer, PACKET_SIZE, 0) != -1 )
 	{	
 		WaitForSingleObject(hMutex, INFINITE);
 
@@ -100,7 +100,7 @@ UINT WINAPI EchoThread(void* arg)
 		case GIFT:
 			tempChar = new char[packet->header.dataSize];
 
-			strncpy(tempChar, packet->data, packet->header.dataSize);
+			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 
 			SendServerMessage(packet->header.name + " ´ÔÀÌ " + to_string(giftData->price) + " °¡°ÝÀÇ " +
