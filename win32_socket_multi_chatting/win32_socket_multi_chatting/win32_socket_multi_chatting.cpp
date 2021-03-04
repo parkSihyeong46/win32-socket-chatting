@@ -119,8 +119,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case IDC_CONNECT_ROOM0:
             case IDC_CONNECT_ROOM1:
-                char clientName[MAX_NAME_LENGTH];
-                GetWindowText(editboxClientName, clientName, MAX_NAME_LENGTH);
+                char clientName[USER_NAME_SIZE];
+                GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
 
                 HideLobbyFrame();
 
@@ -198,10 +198,10 @@ void CreateChattingFrame()
 void UploadChatting(const int kind)
 {
     SetFocus(editBoxInputHandle);
-    char tempChatMessage[PACKET_SIZE];
-    GetWindowText(editBoxInputHandle, tempChatMessage, PACKET_SIZE);
+    char tempChatMessage[PACKET_SIZE - sizeof(header_t) - USER_NAME_SIZE];
+    GetWindowText(editBoxInputHandle, tempChatMessage, PACKET_SIZE - sizeof(header_t) - USER_NAME_SIZE);
     
-    char chatMessage[PACKET_SIZE + MAX_NAME_LENGTH];
+    char chatMessage[PACKET_SIZE];
     switch (kind)
     {
     case COMMON:

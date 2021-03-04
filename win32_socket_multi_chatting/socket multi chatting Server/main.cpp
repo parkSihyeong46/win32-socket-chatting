@@ -95,7 +95,7 @@ UINT WINAPI EchoThread(void* arg)
 		switch ((int)packet->header.kind - 48)
 		{
 		case COMMON:
-			SendClientMessage(packet->header.name + " : " + packet->data);
+			SendClientMessage(string(packet->userName) + " : " + packet->data);
 			break;
 		case GIFT:
 			tempChar = new char[packet->header.dataSize];
@@ -103,8 +103,8 @@ UINT WINAPI EchoThread(void* arg)
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 
-			SendServerMessage(packet->header.name + " 님이 " + to_string(giftData->price) + " 가격의 " +
-				giftData->name + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
+			SendServerMessage(string(packet->userName) + " 님이 " + to_string(giftData->price) + " 가격의 " +
+				giftData->productName + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
 				" 입니다.)");
 
 			delete[] tempChar;

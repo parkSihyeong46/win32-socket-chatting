@@ -27,7 +27,8 @@
 
 #define MAX_LOADSTRING 100
 #define PACKET_SIZE 1024
-#define MAX_NAME_LENGTH 100
+#define PRODUCT_NAME_SIZE 30
+#define USER_NAME_SIZE 30
 #define HEADER_SIZE 10
 
 // 다음은 새 개체에 사용할 기본값입니다.

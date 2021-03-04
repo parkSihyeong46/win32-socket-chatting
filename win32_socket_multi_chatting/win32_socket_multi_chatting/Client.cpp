@@ -8,7 +8,7 @@ Client::Client(string name)
 
 	// test data
 	giftData.price = 100;
-	giftData.name = "초콜릿";
+	strcpy(giftData.productName, "초콜릿");
 	giftData.validity = 10.5f;
 
 	WSADATA wsaData;
@@ -45,8 +45,8 @@ void Client::SendMessageToServer(string chattingMsg)
 {
 	packet_t packet;
 	packet.header.kind = '0';
-	packet.header.name = name;
-	packet.header.dataSize = chattingMsg.size()+1;
+	strcpy(packet.userName, name.c_str());
+	packet.header.dataSize = chattingMsg.size();
 	strcpy(packet.data, chattingMsg.c_str());
 
 	if(send(clientSocket, (char*)&packet, PACKET_SIZE, 0) == -1)
@@ -57,7 +57,7 @@ void Client::SendMessageToServer()
 {
 	packet_t packet;
 	packet.header.kind = '1';
-	packet.header.name = name;
+	strcpy(packet.userName, name.c_str());
 	packet.header.dataSize = sizeof(giftData_t);
 	memcpy(packet.data, (char*)&giftData, sizeof(giftData_t));
 
@@ -68,9 +68,9 @@ void Client::SendMessageToServer()
 string Client::RecvMessageFromServer()
 {
 	string str;
-	char recvMessage[PACKET_SIZE + MAX_NAME_LENGTH] = {};
+	char recvMessage[PACKET_SIZE] = {};
 
-	if (recv(clientSocket, recvMessage, PACKET_SIZE + MAX_NAME_LENGTH, 0) == -1)
+	if (recv(clientSocket, recvMessage, PACKET_SIZE, 0) == -1)
 	{
 		ErrorMsg("recv Error ");
 		closesocket(clientSocket);

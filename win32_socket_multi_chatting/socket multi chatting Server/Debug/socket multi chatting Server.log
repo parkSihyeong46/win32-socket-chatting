@@ -1,1 +1,3 @@
-﻿  socket multi chatting Server.vcxproj -> C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\Debug\socket multi chatting Server.exe
+﻿  main.cpp
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(68,30): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  socket multi chatting Server.vcxproj -> C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\Debug\socket multi chatting Server.exe

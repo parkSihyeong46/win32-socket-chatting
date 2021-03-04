@@ -13,20 +13,20 @@ constexpr const char* SERVER_IP = "192.168.123.101";
 typedef struct
 {
 	char kind;
-	string name;
 	int dataSize;
 } header_t;
 
 typedef struct
 {
 	header_t header;
-	char data[PACKET_SIZE - sizeof(header_t)];
+	char userName[USER_NAME_SIZE];
+	char data[PACKET_SIZE - sizeof(header_t) - USER_NAME_SIZE];
 } packet_t;
 
 typedef struct
 {
 	int price;		// 가격
-	string name;	// 상품명
+	char productName[PRODUCT_NAME_SIZE];	// 상품명
 	float validity;	// 유효기간
 } giftData_t;
 
