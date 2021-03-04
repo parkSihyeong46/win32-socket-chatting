@@ -5,13 +5,12 @@
 class ChatRoom
 {
 private:
-	SOCKET clientSockets[MAXIMUM_ROOM_CLIENT];
+	SOCKET clientSockets[MAXIMUM_ROOM_CLIENT] = {NULL};
 	int clientSocketsLastIndex = 0;
 
 public:
 	void ConnectRoom(SOCKET clientSocket);
 
-	SOCKET* GetClientSockets();
-
+	void SendMessageToClient(string msg);
 };
 

@@ -112,20 +112,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         g_hWnd = hWnd;
         CreateLobbyFrame();
+        client = new Client();
         break;
     case WM_COMMAND:
         {
             switch (LOWORD(wParam))
             {
-            case IDC_CONNECT_ROOM0:
-            case IDC_CONNECT_ROOM1:
                 char clientName[USER_NAME_SIZE];
+            case IDC_CONNECT_ROOM0: // 테스트용 코드 -> 정리 해야 함
                 GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
 
+                client->SetName(clientName);
                 HideLobbyFrame();
+                client->SendConnectRoomMessageToServer(0);
 
                 CreateChattingFrame();
-                client = new Client(clientName);
+                hMutex = CreateMutex(NULL, false, NULL);
+                _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+                break;
+            case IDC_CONNECT_ROOM1:
+                GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
+
+                client->SetName(clientName);
+                HideLobbyFrame();
+                client->SendConnectRoomMessageToServer(1);
+
+                CreateChattingFrame();
                 hMutex = CreateMutex(NULL, false, NULL);
                 _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
                 break;
@@ -212,7 +224,7 @@ void UploadChatting(const int kind)
         client->SendMessageToServer(tempChatMessage);
         break;
     case GIFT:
-        client->SendMessageToServer();
+        client->SendGiftDataToServer();
         break;
     default:
         MessageBox(g_hWnd, "UploadChatting() default error", "UploadChatting() default error", 0);

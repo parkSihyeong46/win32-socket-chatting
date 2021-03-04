@@ -31,6 +31,7 @@ typedef struct
 
 enum SendMessageKind
 {
+	CONNECT_ROOM,
 	COMMON,
 	GIFT,
 };

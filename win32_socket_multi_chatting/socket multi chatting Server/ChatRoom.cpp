@@ -5,7 +5,12 @@ void ChatRoom::ConnectRoom(SOCKET clientSocket)
 	clientSockets[clientSocketsLastIndex++] = clientSocket;
 }
 
-SOCKET* ChatRoom::GetClientSockets()
+void ChatRoom::SendMessageToClient(string msg)
 {
-	return clientSockets;
+	for (int i = 0; i < MAXIMUM_ROOM_CLIENT; i++)
+	{
+		if (clientSockets[i] == NULL)
+			break;
+		send(clientSockets[i], msg.c_str(), msg.size(), 0);
+	}
 }

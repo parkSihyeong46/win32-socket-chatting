@@ -32,6 +32,7 @@ typedef struct
 
 enum SendMessageKind
 {
+	CONNECT_ROOM,
 	COMMON,
 	GIFT,
 };
@@ -39,21 +40,26 @@ enum SendMessageKind
 class Client
 {
 private:
-	string name;
+	string name = "";
 	giftData_t giftData;
 
 	SOCKET clientSocket;
 public:
-	Client(string name);
+	Client();
 	~Client();
 
+	void Init();
+
+	void SendConnectRoomMessageToServer(int roomNumber);
 	void SendMessageToServer(string chattingMsg);
-	void SendMessageToServer();
+	void SendGiftDataToServer();
 	string RecvMessageFromServer();
 
+	void SetName(const string name);
 	const string GetName();
 	giftData_t GetGiftData();
 
+	packet_t MakePacket(const char kind);
 	void ErrorMsg(const string errorMsg);
 };
 

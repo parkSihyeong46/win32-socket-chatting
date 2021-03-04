@@ -8,12 +8,11 @@
 #pragma comment(lib, "ws2_32")
 
 UINT WINAPI EchoThread(void* arg);
-void SendClientMessage(string msg);
-void SendServerMessage(string msg);
 
 HANDLE hMutex;
 SOCKET clientSockets[MAXIMUM_CLIENT];
 
+ChatRoom chatRoom[2];
 int clientSocketsLastIndex = 0;
 int strLen = 0;
 int main()
@@ -84,6 +83,7 @@ UINT WINAPI EchoThread(void* arg)
 	giftData_t* giftData = nullptr;
 	packet_t* packet = nullptr;
 	char* tempChar = nullptr;
+	int roomNumber = -1;
 
 	while (recv(clientSocket, cBuffer, PACKET_SIZE, 0) != -1 )
 	{	
@@ -94,16 +94,31 @@ UINT WINAPI EchoThread(void* arg)
 
 		switch ((int)packet->header.kind - 48)
 		{
+		case CONNECT_ROOM:
+			tempChar = new char[packet->header.dataSize];
+
+			memcpy(tempChar, packet->data, packet->header.dataSize);
+			roomNumber = *((int*)tempChar);
+			chatRoom[*((int*)tempChar)].ConnectRoom(clientSocket);
+
+			delete[] tempChar;
+			break;
 		case COMMON:
-			SendClientMessage(string(packet->userName) + " : " + packet->data);
+			if (roomNumber == -1)
+				break;
+			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " : " + packet->data);
 			break;
 		case GIFT:
+			if (roomNumber == -1)
+				break;
+
 			tempChar = new char[packet->header.dataSize];
 
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 
-			SendServerMessage(string(packet->userName) + " 님이 " + to_string(giftData->price) + " 가격의 " +
+			
+			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " 님이 " + to_string(giftData->price) + " 가격의 " +
 				giftData->productName + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
 				" 입니다.)");
 
@@ -137,19 +152,4 @@ UINT WINAPI EchoThread(void* arg)
 	ReleaseMutex(hMutex);
 	closesocket(clientSocket);
 	return 0;
-}
-void SendClientMessage(string msg)
-{
-	for (int i = 0; i < clientSocketsLastIndex; i++)
-	{
-		send(clientSockets[i], msg.c_str(), msg.size(), 0);
-	}
-}
-
-void SendServerMessage(string msg)
-{
-	for (int i = 0; i < clientSocketsLastIndex; i++)
-	{
-		send(clientSockets[i], msg.c_str(), msg.size(), 0);
-	}
 }
