@@ -48,7 +48,7 @@ void Client::SendConnectRoomMessageToServer(int roomNumber)
 {
 	packet_t packet = MakePacket('0');
 	packet.header.dataSize = sizeof(int);
-	memcpy(packet.data, (char*)roomNumber, sizeof(roomNumber));
+	memcpy(packet.data, (char*)&roomNumber, sizeof(int));
 
 	if (send(clientSocket, (char*)&packet, PACKET_SIZE, 0) == -1)
 		ErrorMsg("send Error ");

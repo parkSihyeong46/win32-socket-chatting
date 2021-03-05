@@ -90,7 +90,6 @@ UINT WINAPI EchoThread(void* arg)
 		WaitForSingleObject(hMutex, INFINITE);
 
 		packet = (packet_t*)cBuffer;
-		cout << packet->data << endl;
 
 		switch ((int)packet->header.kind - 48)
 		{
@@ -101,11 +100,14 @@ UINT WINAPI EchoThread(void* arg)
 			roomNumber = *((int*)tempChar);
 			chatRoom[*((int*)tempChar)].ConnectRoom(clientSocket);
 
+			cout << packet->userName << " 님이 " << roomNumber+1 << "번 방에 접속 했습니다." << endl;
 			delete[] tempChar;
 			break;
 		case COMMON:
 			if (roomNumber == -1)
 				break;
+
+			cout << packet->data << endl;
 			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " : " + packet->data);
 			break;
 		case GIFT:
@@ -116,7 +118,6 @@ UINT WINAPI EchoThread(void* arg)
 
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
-
 			
 			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " 님이 " + to_string(giftData->price) + " 가격의 " +
 				giftData->productName + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
