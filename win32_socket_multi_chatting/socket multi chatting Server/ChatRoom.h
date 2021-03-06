@@ -10,6 +10,9 @@ private:
 
 public:
 	void ConnectRoom(SOCKET clientSocket);
+	void ExitRoom(SOCKET clientSocket);
+
+	const int GetClientSocketsLastIndex();
 
 	void SendMessageToClient(string msg);
 };

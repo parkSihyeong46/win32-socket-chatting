@@ -12,14 +12,13 @@ constexpr const char* SERVER_IP = "192.168.123.101";
 
 typedef struct
 {
-	char kind;
+	int kind;
 	int dataSize;
 } header_t;
 
 typedef struct
 {
 	header_t header;
-	char userName[USER_NAME_SIZE];
 	char data[PACKET_SIZE - sizeof(header_t) - USER_NAME_SIZE];
 } packet_t;
 
@@ -32,6 +31,7 @@ typedef struct
 
 enum SendMessageKind
 {
+	SET_NAME,
 	CONNECT_ROOM,
 	COMMON,
 	GIFT,
@@ -40,26 +40,29 @@ enum SendMessageKind
 class Client
 {
 private:
-	string name = "";
+	string name;
+	int roomNumber;
 	giftData_t giftData;
 
 	SOCKET clientSocket;
+	int connectResult;
 public:
 	Client();
 	~Client();
 
-	void Init();
+	int Init();
 
-	void SendConnectRoomMessageToServer(int roomNumber);
-	void SendMessageToServer(string chattingMsg);
-	void SendGiftDataToServer();
+	void SendDataToServer(int index, string chattingMsg = "");
 	string RecvMessageFromServer();
 
 	void SetName(const string name);
+	void SetRoomNumber(const int roomNumber);
 	const string GetName();
 	giftData_t GetGiftData();
 
-	packet_t MakePacket(const char kind);
+	const int GetConnectResult();
+
+	packet_t MakePacket(const int kind);
 	void ErrorMsg(const string errorMsg);
 };
 

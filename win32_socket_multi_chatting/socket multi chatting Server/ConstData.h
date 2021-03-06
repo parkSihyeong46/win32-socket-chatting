@@ -11,14 +11,13 @@ constexpr const int PRODUCT_NAME_SIZE = 30;
 
 typedef struct
 {
-	char kind;
+	int kind;
 	int dataSize;
 } header_t;
 
 typedef struct
 {
 	header_t header;
-	char userName[USER_NAME_SIZE];
 	char data[PACKET_SIZE - sizeof(header_t) - USER_NAME_SIZE];
 } packet_t;
 
@@ -31,6 +30,7 @@ typedef struct
 
 enum SendMessageKind
 {
+	SET_NAME,
 	CONNECT_ROOM,
 	COMMON,
 	GIFT,

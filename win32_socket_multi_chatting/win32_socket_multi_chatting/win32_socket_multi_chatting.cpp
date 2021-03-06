@@ -27,6 +27,7 @@ HWND editBoxInputHandle;
 void CreateLobbyFrame();
 void HideLobbyFrame();
 void CreateChattingFrame();
+void ConnectChatRoom(const int roomNumber);
 void UploadChatting(const int kind);
 
 void MoveScrollbarToEnd(HWND hwnd);
@@ -118,28 +119,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             switch (LOWORD(wParam))
             {
-                char clientName[USER_NAME_SIZE];
             case IDC_CONNECT_ROOM0: // 테스트용 코드 -> 정리 해야 함
-                GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
+                if (0 != client->GetConnectResult())
+                {
+                    if (client->Init())
+                        break;
+                }
 
-                client->SetName(clientName);
-                HideLobbyFrame();
-                client->SendConnectRoomMessageToServer(0);
-
-                CreateChattingFrame();
-                hMutex = CreateMutex(NULL, false, NULL);
-                _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+                ConnectChatRoom(0);
                 break;
             case IDC_CONNECT_ROOM1:
-                GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
+                if (0 != client->GetConnectResult())
+                {
+                    if (client->Init())
+                        break;
+                }
 
-                client->SetName(clientName);
-                HideLobbyFrame();
-                client->SendConnectRoomMessageToServer(1);
-
-                CreateChattingFrame();
-                hMutex = CreateMutex(NULL, false, NULL);
-                _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+                ConnectChatRoom(1);
                 break;
             case IDC_EDIT_BOX: 
                 break;
@@ -207,6 +203,27 @@ void CreateChattingFrame()
     CreateWindow("button", "선물", WS_CHILD | WS_VISIBLE | WS_BORDER, 428, 450, 50, 50, g_hWnd, (HMENU)IDC_SEND_GIFT, hInst, NULL);
 }
 
+void ConnectChatRoom(const int roomNumber)
+{
+    if (roomNumber < 0 || 1 < roomNumber )
+        return;
+
+    char clientName[USER_NAME_SIZE];
+    GetWindowText(editboxClientName, clientName, USER_NAME_SIZE);
+
+    client->SetName(clientName);
+    client->SetRoomNumber(roomNumber);
+
+    HideLobbyFrame();
+
+    client->SendDataToServer(SET_NAME);
+    client->SendDataToServer(CONNECT_ROOM);
+
+    CreateChattingFrame();
+    hMutex = CreateMutex(NULL, false, NULL);
+    _beginthreadex(NULL, 0, ReceiveMessageThread, nullptr, 0, NULL);
+}
+
 void UploadChatting(const int kind)
 {
     SetFocus(editBoxInputHandle);
@@ -221,10 +238,10 @@ void UploadChatting(const int kind)
             return;
 
         SetWindowText(editBoxInputHandle, "");
-        client->SendMessageToServer(tempChatMessage);
+        client->SendDataToServer(COMMON, tempChatMessage);
         break;
     case GIFT:
-        client->SendGiftDataToServer();
+        client->SendDataToServer(GIFT);
         break;
     default:
         MessageBox(g_hWnd, "UploadChatting() default error", "UploadChatting() default error", 0);

@@ -83,6 +83,7 @@ UINT WINAPI EchoThread(void* arg)
 	giftData_t* giftData = nullptr;
 	packet_t* packet = nullptr;
 	char* tempChar = nullptr;
+	string userName = "null";
 	int roomNumber = -1;
 
 	while (recv(clientSocket, cBuffer, PACKET_SIZE, 0) != -1 )
@@ -91,44 +92,46 @@ UINT WINAPI EchoThread(void* arg)
 
 		packet = (packet_t*)cBuffer;
 
-		switch ((int)packet->header.kind - 48)
-		{
-		case CONNECT_ROOM:
-			tempChar = new char[packet->header.dataSize];
+		tempChar = new char[packet->header.dataSize];
 
+		switch (packet->header.kind)
+		{
+		case SET_NAME:
+			strcpy(tempChar, packet->data);
+			userName = tempChar;
+			break;
+		case CONNECT_ROOM:
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			roomNumber = *((int*)tempChar);
 			chatRoom[*((int*)tempChar)].ConnectRoom(clientSocket);
 
-			cout << packet->userName << " 님이 " << roomNumber+1 << "번 방에 접속 했습니다." << endl;
-			delete[] tempChar;
+			cout << userName << " 님이 " << roomNumber+1 << "번 방에 접속 했습니다." << endl;
+			cout << roomNumber << "번 방 접속 인원 : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl << endl;
 			break;
 		case COMMON:
-			if (roomNumber == -1)
+			if (roomNumber < 0)
 				break;
 
 			cout << packet->data << endl;
-			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " : " + packet->data);
+			chatRoom[roomNumber].SendMessageToClient(userName + " : " + packet->data);
 			break;
 		case GIFT:
-			if (roomNumber == -1)
+			if (roomNumber < 0)
 				break;
-
-			tempChar = new char[packet->header.dataSize];
 
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 			
-			chatRoom[roomNumber].SendMessageToClient(string(packet->userName) + " 님이 " + to_string(giftData->price) + " 가격의 " +
+			chatRoom[roomNumber].SendMessageToClient(userName + " 님이 " + to_string(giftData->price) + " 가격의 " +
 				giftData->productName + "을 보냈습니다! (만료기간 : " + to_string(giftData->validity) +
 				" 입니다.)");
-
-			delete[] tempChar;
 			break;
 		default:
 			cout << packet->header.kind << " 수신오류 확인바람" << endl;
 			continue;
 		}
+
+		delete[] tempChar;
 
 		memset(cBuffer, NULL, PACKET_SIZE);
 		ReleaseMutex(hMutex);
@@ -137,6 +140,14 @@ UINT WINAPI EchoThread(void* arg)
 	WaitForSingleObject(hMutex, INFINITE);
 	// recv -1 이니 서버와 연결 종료 상태
 	// client 제거 처리
+
+	if (roomNumber != -1)
+	{
+		chatRoom[roomNumber].ExitRoom(clientSocket);
+		cout << roomNumber << "번 방 접속 인원 : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl;
+	}
+
+	cout << userName << " 님이 " << roomNumber << "번 방을 나갔습니다." << endl << endl;
 	for (int i = 0; i < clientSocketsLastIndex; i++)
 	{
 		if (clientSockets[i] == clientSocket)
@@ -148,7 +159,7 @@ UINT WINAPI EchoThread(void* arg)
 			// 한칸씩 당겨와 재정렬
 		}
 	}
-	
+
 	clientSocketsLastIndex--;
 	ReleaseMutex(hMutex);
 	closesocket(clientSocket);
