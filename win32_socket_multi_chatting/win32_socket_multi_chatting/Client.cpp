@@ -9,8 +9,8 @@ Client::Client()
 
 	// test data
 	giftData.price = 100;
-	strcpy(giftData.productName, "초콜릿");
-	giftData.validity = 10.5f;
+	memcpy(giftData.productName, "초콜릿", sizeof("초콜릿"));
+	giftData.validity = 20210320;
 
 	Init();
 }
@@ -66,7 +66,7 @@ void Client::SendDataToServer(int index, string chattingMsg)
 		break;
 	case COMMON:
 		packet.header.dataSize = chattingMsg.size();
-		strcpy(packet.data, chattingMsg.c_str());
+		memcpy(packet.data, chattingMsg.c_str(), chattingMsg.size());
 		break;
 	case GIFT:
 		packet.header.dataSize = sizeof(giftData_t);

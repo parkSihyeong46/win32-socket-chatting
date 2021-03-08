@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <WinSock2.h>
 #include <process.h>
 #include <list>
@@ -22,8 +22,8 @@ int main()
 
 	int err;
 	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	// Winsock2¸¦ »ç¿ëÈ¯°æ ¼³Á¤
-	// 0 ¸®ÅÏÇÏ¸é Á¤»ó Á¾·á
+	// Winsock2ë¥¼ ì‚¬ìš©í™˜ê²½ ì„¤ì •
+	// 0 ë¦¬í„´í•˜ë©´ ì •ìƒ ì¢…ë£Œ
 
 	if (err != 0)
 	{
@@ -32,46 +32,52 @@ int main()
 	}
 
 	SOCKET serverSocket;
-	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);	// Åë½Å ÇÁ·ÎÅäÄİ ¼³Á¤
+	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);	// í†µì‹  í”„ë¡œí† ì½œ ì„¤ì •
 
 	SOCKADDR_IN serverAddress = {};
 	serverAddress.sin_family = AF_INET;
-	// sin_familly : ¼ÒÄÏ ÁÖ¼Ò Ã¼°è
+	// sin_familly : ì†Œì¼“ ì£¼ì†Œ ì²´ê³„
 	serverAddress.sin_port = htons(PORT);
-	// sin_port : Æ÷Æ®
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// s_addr : IPv4 ÀÇ¹Ì, INADDR_ANY : ÇöÀç µ¿ÀÛµÇ´Â ÄÄÇ»ÅÍÀÇ IPÁÖ¼Ò
-	// sin_addr : IP ÁÖ¼Ò
+	// sin_port : í¬íŠ¸
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// s_addr : IPv4 ì˜ë¯¸, INADDR_ANY : í˜„ì¬ ë™ì‘ë˜ëŠ” ì»´í“¨í„°ì˜ IPì£¼ì†Œ
+	// sin_addr : IP ì£¼ì†Œ
 
-	if (-1 == bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress))) // ¼­¹ö ÃøÀÇ ¼ÒÄÏ¿¡ IP¿Í Æ÷Æ®¸¦ ÇÒ´çÇÏ¿© ³×Æ®¿öÅ© ÀÎÅÍÆäÀÌ½º¿Í ¹­ÀÏ ¼ö ÀÖµµ·Ï ÇÔ
+	if (-1 == bind(serverSocket, (SOCKADDR*)&serverAddress, sizeof(serverAddress))) // ì„œë²„ ì¸¡ì˜ ì†Œì¼“ì— IPì™€ í¬íŠ¸ë¥¼ í• ë‹¹í•˜ì—¬ ë„¤íŠ¸ì›Œí¬ ì¸í„°í˜ì´ìŠ¤ì™€ ë¬¶ì¼ ìˆ˜ ìˆë„ë¡ í•¨
 	{
 		cout << "bind error : " << endl;
 		return 1;
 	}
 	
-	listen(serverSocket, SOMAXCONN);	// SOMAXCONN : ÇÑ²¨¹ø¿¡ ¿äÃ» °¡´ÉÇÑ ÃÖ´ë Á¢¼Ó ½ÂÀÎ ¼ö
-	// Å¬¶óÀÌ¾ğÆ®·Î ºÎÅÍ ¿¬°á ¿äÃ»À» ±â´Ù¸°´Ù.
+	if (-1 == listen(serverSocket, SOMAXCONN))	// SOMAXCONN : í•œêº¼ë²ˆì— ìš”ì²­ ê°€ëŠ¥í•œ ìµœëŒ€ ì ‘ì† ìŠ¹ì¸ ìˆ˜
+	{
+		cout << "listen error : " << endl;
+		return 1;
+	}
+	// í´ë¼ì´ì–¸íŠ¸ë¡œ ë¶€í„° ì—°ê²° ìš”ì²­ì„ ê¸°ë‹¤ë¦°ë‹¤.
 
 	SOCKADDR_IN clientAddress = {};
-	// Å¬¶óÀÌ¾ğÆ®ÀÇ ÁÖ¼Ò Á¤º¸¸¦ ¹ŞÀ» SOCKADDR_IN »ı¼º
+	// í´ë¼ì´ì–¸íŠ¸ì˜ ì£¼ì†Œ ì •ë³´ë¥¼ ë°›ì„ SOCKADDR_IN ìƒì„±
 
-	hMutex = CreateMutex(NULL, false, NULL);	// ¹ÂÅØ½º »ı¼º, false¶ó¼­ mutex ¹Ù·Î ½ÇÇà X
+	hMutex = CreateMutex(NULL, false, NULL);	// ë®¤í…ìŠ¤ ìƒì„±, falseë¼ì„œ mutex ë°”ë¡œ ì‹¤í–‰ X
+
 	while (true)
 	{
 		int clientAddressSize = sizeof(clientAddress);
-		clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressSize);	// accept() ¸¦ ÀÌ¿ëÇØ Å¬¶óÀÌ¾ğÆ®ÀÇ ¿¬°áÀ» ¼ö¶ôÇÑ´Ù.
-		WaitForSingleObject(hMutex, INFINITE);									// ¹ÂÅØ½º ½ÇÇà
+		clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressSize);	// accept() ë¥¼ ì´ìš©í•´ í´ë¼ì´ì–¸íŠ¸ì˜ ì—°ê²°ì„ ìˆ˜ë½í•œë‹¤.
+		WaitForSingleObject(hMutex, INFINITE);									// ë®¤í…ìŠ¤ ì‹¤í–‰
 		clientSockets[clientSocketsLastIndex++] = clientSocket;
 
-		ReleaseMutex(hMutex);															// ¹ÂÅØ½º Á¾·á
-		_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread ½ÇÇà
+		ReleaseMutex(hMutex);															// ë®¤í…ìŠ¤ ì¢…ë£Œ
+		_beginthreadex(NULL, 0, EchoThread, &clientSocket, 0, NULL);	// echo thread ì‹¤í–‰
 		cout << "Connect Ip : " << inet_ntoa(clientAddress.sin_addr) << endl;
 	}
 
+	CloseHandle(hMutex);
 	closesocket(serverSocket);	
-	// socket() ÀÌ¿ë ÇßÀ¸´Ï close Ã³¸®
+	// socket() ì´ìš© í–ˆìœ¼ë‹ˆ close ì²˜ë¦¬
 
 	WSACleanup();
-	// Winsock2¸¦ »ç¿ëÈ¯°æ Á¾·á
+	// Winsock2ë¥¼ ì‚¬ìš©í™˜ê²½ ì¢…ë£Œ
 
 	return 0;
 }
@@ -105,8 +111,8 @@ UINT WINAPI EchoThread(void* arg)
 			roomNumber = *((int*)tempChar);
 			chatRoom[*((int*)tempChar)].ConnectRoom(clientSocket);
 
-			cout << userName << " ´ÔÀÌ " << roomNumber+1 << "¹ø ¹æ¿¡ Á¢¼Ó Çß½À´Ï´Ù." << endl;
-			cout << roomNumber << "¹ø ¹æ Á¢¼Ó ÀÎ¿ø : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl << endl;
+			cout << userName << " ë‹˜ì´ " << roomNumber+1 << "ë²ˆ ë°©ì— ì ‘ì† í–ˆìŠµë‹ˆë‹¤." << endl;
+			cout << roomNumber << "ë²ˆ ë°© ì ‘ì† ì¸ì› : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl << endl;
 			break;
 		case COMMON:
 			if (roomNumber < 0)
@@ -122,12 +128,12 @@ UINT WINAPI EchoThread(void* arg)
 			memcpy(tempChar, packet->data, packet->header.dataSize);
 			giftData = (giftData_t*)tempChar;
 			
-			chatRoom[roomNumber].SendMessageToClient(userName + " ´ÔÀÌ " + to_string(giftData->price) + " °¡°İÀÇ " +
-				giftData->productName + "À» º¸³Â½À´Ï´Ù! (¸¸·á±â°£ : " + to_string(giftData->validity) +
-				" ÀÔ´Ï´Ù.)");
+			chatRoom[roomNumber].SendMessageToClient(userName + " ë‹˜ì´ " + to_string(giftData->price) + " ê°€ê²©ì˜ " +
+				giftData->productName + "ì„ ë³´ëƒˆìŠµë‹ˆë‹¤! (ë§Œë£Œê¸°ê°„ : " + to_string(giftData->validity) +
+				" ì…ë‹ˆë‹¤.)");
 			break;
 		default:
-			cout << packet->header.kind << " ¼ö½Å¿À·ù È®ÀÎ¹Ù¶÷" << endl;
+			cout << packet->header.kind << " ìˆ˜ì‹ ì˜¤ë¥˜ í™•ì¸ë°”ëŒ" << endl;
 			continue;
 		}
 
@@ -138,16 +144,16 @@ UINT WINAPI EchoThread(void* arg)
 	}
 
 	WaitForSingleObject(hMutex, INFINITE);
-	// recv -1 ÀÌ´Ï ¼­¹ö¿Í ¿¬°á Á¾·á »óÅÂ
-	// client Á¦°Å Ã³¸®
+	// recv -1 ì´ë‹ˆ ì„œë²„ì™€ ì—°ê²° ì¢…ë£Œ ìƒíƒœ
+	// client ì œê±° ì²˜ë¦¬
 
 	if (roomNumber != -1)
 	{
 		chatRoom[roomNumber].ExitRoom(clientSocket);
-		cout << roomNumber << "¹ø ¹æ Á¢¼Ó ÀÎ¿ø : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl;
+		cout << roomNumber << "ë²ˆ ë°© ì ‘ì† ì¸ì› : " << chatRoom[roomNumber].GetClientSocketsLastIndex() << endl;
 	}
 
-	cout << userName << " ´ÔÀÌ " << roomNumber << "¹ø ¹æÀ» ³ª°¬½À´Ï´Ù." << endl << endl;
+	cout << userName << " ë‹˜ì´ " << roomNumber << "ë²ˆ ë°©ì„ ë‚˜ê°”ìŠµë‹ˆë‹¤." << endl << endl;
 	for (int i = 0; i < clientSocketsLastIndex; i++)
 	{
 		if (clientSockets[i] == clientSocket)
@@ -156,7 +162,7 @@ UINT WINAPI EchoThread(void* arg)
 			{
 				clientSockets[i] = clientSockets[i + 1];
 			}
-			// ÇÑÄ­¾¿ ´ç°Ü¿Í ÀçÁ¤·Ä
+			// í•œì¹¸ì”© ë‹¹ê²¨ì™€ ì¬ì •ë ¬
 		}
 	}
 

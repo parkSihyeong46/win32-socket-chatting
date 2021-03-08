@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 using namespace std;
 
@@ -23,9 +23,9 @@ typedef struct
 
 typedef struct
 {
-	int price;		// °¡°İ
-	char productName[PRODUCT_NAME_SIZE];	// »óÇ°¸í
-	float validity;	// À¯È¿±â°£
+	int price;		// ê°€ê²©
+	char productName[PRODUCT_NAME_SIZE];	// ìƒí’ˆëª…
+	unsigned int validity;	// ìœ íš¨ê¸°ê°„
 } giftData_t;
 
 enum SendMessageKind

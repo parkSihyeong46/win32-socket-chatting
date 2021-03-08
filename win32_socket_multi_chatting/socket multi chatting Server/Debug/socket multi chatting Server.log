@@ -1,4 +1,4 @@
 ﻿  main.cpp
-C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(67,30): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(100,4): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(72,30): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\socket multi chatting Server\main.cpp(106,4): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   socket multi chatting Server.vcxproj -> C:\Users\parks\Desktop\GitHub\win32-socket-chatting\win32_socket_multi_chatting\Debug\socket multi chatting Server.exe

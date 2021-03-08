@@ -26,7 +26,7 @@ typedef struct
 {
 	int price;		// 가격
 	char productName[PRODUCT_NAME_SIZE];	// 상품명
-	float validity;	// 유효기간
+	unsigned int validity;	// 유효기간
 } giftData_t;
 
 enum SendMessageKind
